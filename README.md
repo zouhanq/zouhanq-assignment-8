@@ -26,7 +26,7 @@ This will automatically install the necessary packages listed in `requirements.t
 - scipy
 - matplotlib
 
-## Part 1: Implementing SVD
+## Part 1: Implementing Logistic Regression
 
 1. **Generate Clusters with a Shift**  
 - Implement the code to shift the second cluster along both the x-axis and y-axis by a specified `distance` parameter. This step will simulate different levels of separation between clusters, which you will explore later in the assignment.
