@@ -1,8 +1,11 @@
 import numpy as np
+import matplotlib
+matplotlib.use('Agg') 
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegression
 from scipy.spatial.distance import cdist
 import os
+
 
 result_dir = "results"
 os.makedirs(result_dir, exist_ok=True)
@@ -20,7 +23,7 @@ def generate_ellipsoid_clusters(distance, n_samples=100, cluster_std=0.5):
     X2 = np.random.multivariate_normal(mean=[1, 1], cov=covariance_matrix, size=n_samples)
     
     # Implement: Shift the second cluster along the x-axis and y-axis for a given distance
-    raise NotImplementedError("Implement the shift of the second cluster")
+    X2 += np.array([distance, -distance])
     y2 = np.ones(n_samples)
 
     # Combine the clusters into one dataset
@@ -51,23 +54,45 @@ def do_experiments(start, end, step_num):
     for i, distance in enumerate(shift_distances, 1):
         X, y = generate_ellipsoid_clusters(distance=distance)
         # Implement: record all necessary information for each distance
-        raise NotImplementedError("Record all necessary information for each distance")
+        # Fit logistic regression and record parameters
+        model, beta0, beta1, beta2 = fit_logistic_regression(X, y)
+        beta0_list.append(beta0)
+        beta1_list.append(beta1)
+        beta2_list.append(beta2)
+
+        # Calculate slope and intercept of the decision boundary
+        slope = -beta1 / beta2
+        intercept = -beta0 / beta2
+        slope_list.append(slope)
+        intercept_list.append(intercept)
+
+        # Calculate logistic loss
+        logistic_loss = -np.mean(y * np.log(model.predict_proba(X)[:, 1]) + (1 - y) * np.log(1 - model.predict_proba(X)[:, 1]))
+        loss_list.append(logistic_loss)
 
         # Implement: Plot the dataset
         plt.subplot(n_rows, n_cols, i)
-        raise NotImplementedError("Plot the dataset")
+        # Scatter plot for two classes
+        plt.scatter(X[y == 0][:, 0], X[y == 0][:, 1], c="blue", label="Class 0")
+        plt.scatter(X[y == 1][:, 0], X[y == 1][:, 1], c="red", label="Class 1")
+        
+        x_vals = np.linspace(X[:, 0].min() - 1, X[:, 0].max() + 1, 100)
+        y_vals = slope * x_vals + intercept
+        plt.plot(x_vals, y_vals, "k--", label="Decision Boundary")
 
-        # Implement: Calculate and store logistic loss
-        raise NotImplementedError("Calculate and store logistic loss")
+
         # Calculate margin width between 70% confidence contours for each class
         x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
         y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+
+        # Plot the decision boundary
+
+        
         xx, yy = np.meshgrid(np.linspace(x_min, x_max, 200), np.linspace(y_min, y_max, 200))
         Z = model.predict_proba(np.c_[xx.ravel(), yy.ravel()])[:, 1]
         Z = Z.reshape(xx.shape)
 
-        # Implement: Calculate decision boundary slope and intercept
-        raise NotImplementedError("Calculate and plot decision boundary slope and intercept")
+
 
         # Plot fading red and blue contours for confidence levels
         contour_levels = [0.7, 0.8, 0.9]
